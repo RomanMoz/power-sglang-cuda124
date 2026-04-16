@@ -1,3 +1,29 @@
+
+## **Install Release**
+
+```bash
+$ pip install power-sglang-cuda124
+```
+## **Requirements**
+
+- Linux ppc64le
+- Python 3.11
+- CUDA 12.4
+- NVIDIA Driver ≥ 550
+- power_torch_cuda124
+
+```bash
+$ python3 -m pip install https://github.com/RomanMoz/power-torch-cuda124/releases/download/v2.12.0a1/power_torch_cuda124-2.12.0a1-cp311-cp311-linux_ppc64le.whl
+```
+- power_triton_cuda124
+
+```bash
+$ python3 -m pip install https://github.com/RomanMoz/power-triton-cuda124/releases/download/v1.0.1/power_triton_cuda124-3.6.0-cp311-cp311-linux_ppc64le.whl
+```
+
+--------------------------------------------------------------------------------
+
+
 <div align="center" id="sglangtop">
 <img src="https://raw.githubusercontent.com/sgl-project/sglang/main/assets/logo.png" alt="logo" width="400" margin="10px"></img>
 
