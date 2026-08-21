@@ -154,7 +154,8 @@ set(SGL_KERNEL_CUDA_FLAGS
     # "--threads=32"
 
     # Supress warnings
-    "-Xcompiler=-Wno-clang-format-violations"
+    # -Wno-clang-format-violations is Clang-only; g++ (cc1plus) does not
+    # recognize it and prints a note on every translation unit.
     "-Xcompiler=-Wno-conversion"
     "-Xcompiler=-Wno-deprecated-declarations"
     "-Xcompiler=-Wno-terminate"
@@ -203,11 +204,18 @@ if (SGL_KERNEL_ENABLE_FP8)
     )
 endif()
 
+option(ENABLE_SM70 "Enable gencode for SM70 (Tesla V100)" OFF)
+
 if (ENABLE_BELOW_SM90)
     list(APPEND SGL_KERNEL_CUDA_FLAGS
         "-gencode=arch=compute_80,code=sm_80"
         "-gencode=arch=compute_89,code=sm_89"
     )
+    if (ENABLE_SM70)
+        list(APPEND SGL_KERNEL_CUDA_FLAGS
+            "-gencode=arch=compute_70,code=sm_70"
+        )
+    endif()
     if (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
         list(APPEND SGL_KERNEL_CUDA_FLAGS
             "-gencode=arch=compute_87,code=sm_87"
@@ -242,8 +250,9 @@ if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "12.8" OR SGL_KERNEL_ENABLE_SM100A)
     endif()
 endif()
 
-if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "12.4")
-    set(SGL_KERNEL_ENABLE_FA3 ON)
+# Do not auto-enable FA3 from CUDA 12.4: sm_90a is unused on Volta and
+# find_package(Torch) fills CUDA_VERSION after the empty Detected CUDA_VERSION= log.
+if (SGL_KERNEL_ENABLE_FA3)
     list(APPEND SGL_KERNEL_CUDA_FLAGS
         "-gencode=arch=compute_90a,code=sm_90a"
     )
@@ -339,8 +348,19 @@ set(INCLUDES
 )
 
 # =========================== Common SM90 Build ============================= #
-# Build SM90 library with fast math optimization (same namespace, different directory)
-Python_add_library(common_ops_sm90_build MODULE USE_SABI ${SKBUILD_SABI_VERSION} WITH_SOABI ${SOURCES})
+# SM100-only (MXFP8 Blackwell): do not link into sm90/sm100 builds on ppc64le/V100.
+set(SOURCES_ES_SM100_ONLY
+    "csrc/expert_specialization/es_sm100_mxfp8_blockscaled.cu"
+    "csrc/expert_specialization/es_sm100_mxfp8_blockscaled_group_quant.cu"
+)
+set(SOURCES_FOR_SM90 ${SOURCES})
+list(REMOVE_ITEM SOURCES_FOR_SM90 ${SOURCES_ES_SM100_ONLY})
+list(APPEND SOURCES_FOR_SM90 "csrc/expert_specialization/es_sm100_mxfp8_ops_stub.cpp")
+set(SOURCES_FOR_SM100 ${SOURCES})
+list(REMOVE_ITEM SOURCES_FOR_SM100 ${SOURCES_ES_SM100_ONLY})
+list(APPEND SOURCES_FOR_SM100 "csrc/expert_specialization/es_sm100_mxfp8_ops_stub.cpp")
+
+Python_add_library(common_ops_sm90_build MODULE USE_SABI ${SKBUILD_SABI_VERSION} WITH_SOABI ${SOURCES_FOR_SM90})
 
 target_compile_options(common_ops_sm90_build PRIVATE
     $<$<COMPILE_LANGUAGE:CUDA>:${SGL_KERNEL_CUDA_FLAGS} -use_fast_math>
@@ -354,7 +374,7 @@ set_target_properties(common_ops_sm90_build PROPERTIES
 
 # =========================== Common SM100+ Build ============================= #
 # Build SM100+ library with precise math (same namespace, different directory)
-Python_add_library(common_ops_sm100_build MODULE USE_SABI ${SKBUILD_SABI_VERSION} WITH_SOABI ${SOURCES})
+Python_add_library(common_ops_sm100_build MODULE USE_SABI ${SKBUILD_SABI_VERSION} WITH_SOABI ${SOURCES_FOR_SM100})
 
 target_compile_options(common_ops_sm100_build PRIVATE
     $<$<COMPILE_LANGUAGE:CUDA>:${SGL_KERNEL_CUDA_FLAGS}>

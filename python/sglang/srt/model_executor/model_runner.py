@@ -1029,8 +1029,10 @@ class ModelRunner(ModelRunnerKVCacheMixin):
                 )
                 self.server_args.dtype = "float16"
                 self.model_config.dtype = torch.float16
-                if torch.cuda.get_device_capability()[1] < 5:
-                    raise RuntimeError("SGLang only supports sm75 and above.")
+                # Volta (sm70) is allowed: sgl-kernel is built with sm_70 gencode;
+                # attention must run on the triton backend.
+                if torch.cuda.get_device_capability()[0] < 7:
+                    raise RuntimeError("SGLang only supports sm70 and above.")
 
         set_cuda_arch()
 

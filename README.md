@@ -1,5 +1,45 @@
 
+# power-sglang-cuda124
+
+IBM **POWER9 (ppc64le)** fork of [SGLang](https://github.com/sgl-project/sglang), optimized for **2× NVIDIA Tesla V100-SXM2 16GB (sm70)** and **CUDA 12.4**.
+
+This is **not** upstream SGLang. Volta has no bf16 / fp8 / FA3. This tree:
+
+- allows **sm70** (upstream aborts below sm75)
+- builds `sgl-kernel` with `-DENABLE_SM70=ON`
+- keeps FA3 **off** (no auto `sm_90a` from CUDA 12.4)
+- stubs SM100 MXFP8 kernels so the wheel links on ppc64le
+- serve with `--attention-backend triton --dtype float16 --tp 2`
+
+Tested with `ibm-granite/granite-4.1-8b` on 2× V100 16GB (`--max-model-len 8192`). Granite + Open WebUI notes: [GRANITE.md](GRANITE.md).
+
+## Hardware
+
+| | |
+| --- | --- |
+| CPU | IBM POWER9, little-endian `ppc64le` |
+| GPU | 2× Tesla V100-SXM2 16GB, compute **7.0** |
+| CUDA | 12.4, NVIDIA driver ≥ 550 |
+| Python | 3.11 |
+
+## Install kernel wheel (sm70)
+
+```bash
+python3 -m pip install \
+  https://github.com/RomanMoz/power-sglang-cuda124/releases/download/v1.0.1/power_sgl_kernel_cuda124-1.0.1-cp310-abi3-linux_ppc64le.whl
+```
+
+Rebuild from this tree:
+
+```bash
+cd sgl-kernel
+export CMAKE_PREFIX_PATH="$(python3 -c 'import torch.utils; print(torch.utils.cmake_prefix_path)')"
+export CMAKE_ARGS="-DENABLE_SM70=ON -DENABLE_BELOW_SM90=ON -DSGL_KERNEL_ENABLE_FP4=OFF -DSGL_KERNEL_ENABLE_FA3=OFF -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
+python3 -m pip install -v --no-build-isolation .
+```
+
 ## **Install Release**
+
 
 ```bash
 $ pip install power-sglang-cuda124
