@@ -7,25 +7,52 @@ requires = [
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "sglang-kernel"
-version = "0.4.0"
+name = "power-sgl-kernel-cuda124"
+version = "1.0.1"
 authors = [
-  { name="SGLang Kernel Team", email="sglang@lmsys.org" },
+  { name = "Armlinsoft Team", email = "admin@armlinsoft.net" },
 ]
-description = "Kernel Library for SGLang"
+maintainers = [
+  { name = "Armlinsoft", email = "contact@armlinsoft.net" },
+]
+description = "SGLang CUDA kernels for IBM POWER9 (ppc64le), CUDA 12.4, Tesla V100 sm70"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
+keywords = [
+  "sglang",
+  "cuda",
+  "ppc64le",
+  "power9",
+  "tesla-v100",
+  "sm70",
+  "granite",
+  "llm-inference",
+]
 classifiers = [
-  "Programming Language :: Python :: 3",
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
   "License :: OSI Approved :: Apache Software License",
-  "Environment :: GPU :: NVIDIA CUDA"
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Environment :: GPU :: NVIDIA CUDA",
+  "Environment :: GPU :: NVIDIA CUDA :: 12",
 ]
 dependencies = []
 
 [project.urls]
-"Homepage" = "https://github.com/sgl-project/sglang/tree/main/sgl-kernel"
-"Bug Tracker" = "https://github.com/sgl-project/sglang/issues"
+Homepage = "https://github.com/RomanMoz/power-sglang-cuda124"
+Documentation = "https://github.com/RomanMoz/power-sglang-cuda124/blob/main/GRANITE.md"
+Source = "https://github.com/RomanMoz/power-sglang-cuda124"
+Issues = "https://github.com/RomanMoz/power-sglang-cuda124/issues"
+Release = "https://github.com/RomanMoz/power-sglang-cuda124/releases/tag/v1.0.1"
+"Download wheel" = "https://github.com/RomanMoz/power-sglang-cuda124/releases/download/v1.0.1/power_sgl_kernel_cuda124-1.0.1-cp310-abi3-linux_ppc64le.whl"
 
 [tool.wheel]
 exclude = [
